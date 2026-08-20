@@ -1,0 +1,6 @@
+{
+  "name": "Guardiam",
+  "description": "Aplicativo de segurança pessoal e proteção em tempo real com design system e scaffold completo baseado no Guardiam Shield.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

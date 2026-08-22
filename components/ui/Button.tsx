@@ -1,8 +1,9 @@
 import React from 'react';
+import { useTheme } from '../../theme/themeContext';
 
 export type ButtonVariant = 
-  | 'primary'      // Azul vibrante #1565C0, texto branco
-  | 'secondary'    // Fundo azul claro #E3F2FD, texto azul #1565C0
+  | 'primary'      // Cor primária adaptável com texto contrastante WCAG
+  | 'secondary'    // Fundo suave primário com texto primário
   | 'sos'          // Borda vermelha fina ou texto vermelho
   | 'emergency'    // Fundo branco sólido em tela vermelha
   | 'danger'       // Fundo vermelho de emergência #DC2626
@@ -33,8 +34,11 @@ export const Button: React.FC<ButtonProps> = ({
   className = '',
   disabled,
   id,
+  style,
   ...props
 }) => {
+  const { tokens } = useTheme();
+
   const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-150 active:scale-[0.98] select-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
 
   const sizeStyles = {
@@ -44,19 +48,33 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const variantStyles = {
-    primary: 'bg-[#1565C0] hover:bg-[#0D47A1] text-white shadow-sm border border-transparent',
-    secondary: 'bg-[#E3F2FD] hover:bg-[#BBDEFB] text-[#1565C0] border border-transparent',
+    primary: 'shadow-sm border border-transparent hover:opacity-95',
+    secondary: 'border border-transparent hover:opacity-90',
     sos: 'bg-white hover:bg-red-50 text-[#DC2626] border border-[#DC2626]/40 shadow-sm font-bold',
     emergency: 'bg-white hover:bg-slate-100 text-[#DC2626] font-bold text-base shadow-lg border border-transparent',
     danger: 'bg-[#DC2626] hover:bg-[#B91C1C] text-white font-bold shadow-sm border border-transparent',
-    outline: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-sm',
-    ghost: 'bg-transparent hover:bg-slate-100 text-slate-600',
+    outline: 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm',
+    ghost: 'bg-transparent hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300',
   };
+
+  // Dynamic style overrides for theme-connected variants
+  const dynamicStyles: React.CSSProperties = {
+    ...style,
+  };
+
+  if (variant === 'primary') {
+    dynamicStyles.backgroundColor = tokens.primary;
+    dynamicStyles.color = tokens.primaryContrast;
+  } else if (variant === 'secondary') {
+    dynamicStyles.backgroundColor = tokens.primaryLight;
+    dynamicStyles.color = tokens.primary;
+  }
 
   return (
     <button
       id={id}
       disabled={disabled || isLoading}
+      style={dynamicStyles}
       className={`
         ${baseStyles}
         ${sizeStyles[size]}

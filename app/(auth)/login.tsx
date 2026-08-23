@@ -17,23 +17,58 @@ import { Button } from '../../src/components/ui/Button';
 import { colors } from '../../src/theme/colors';
 import { typography } from '../../src/theme/typography';
 import { spacing } from '../../src/theme/spacing';
+import { useAuth } from '../../src/auth/AuthContext';
+import { ApiError } from '../../src/api/apiClient';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleLoginPress = () => {
-    // Fase 3: Apenas estático. Sem auth real, sem token fake, sem navegação para home.
-    Alert.alert('Autenticação', 'Auth será conectado na Fase 4');
-    console.log('Auth será conectado na Fase 4');
+  const handleLoginPress = async () => {
+    setErrorMessage(null);
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setErrorMessage('Por favor, informe seu email.');
+      return;
+    }
+
+    if (!password) {
+      setErrorMessage('Por favor, informe sua senha.');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await login({
+        email: trimmedEmail,
+        password,
+      });
+      // Login com sucesso real
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setErrorMessage(error.message);
+      } else if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage('Ocorreu um erro ao entrar. Tente novamente.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
-    Alert.alert('Recuperação de Senha', 'Recuperação de conta será conectada na Fase 4');
+    Alert.alert('Recuperação de Senha', 'Recuperação de conta será conectada em breve.');
   };
 
   const handleNavigateToRegister = () => {
+    if (isLoading) return;
     router.push('/(auth)/register');
   };
 
@@ -55,22 +90,36 @@ export default function LoginScreen() {
 
           {/* Form Fields */}
           <View style={styles.formContainer}>
+            {errorMessage && (
+              <View style={styles.errorBanner}>
+                <Text style={styles.errorBannerText}>{errorMessage}</Text>
+              </View>
+            )}
+
             <Input
               label="Email"
               placeholder="seu@email.com"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (errorMessage) setErrorMessage(null);
+              }}
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              editable={!isLoading}
             />
 
             <Input
               label="Senha"
               placeholder="••••••••"
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (errorMessage) setErrorMessage(null);
+              }}
               secureTextEntry
+              editable={!isLoading}
             />
 
             <View style={styles.buttonContainer}>
@@ -78,14 +127,17 @@ export default function LoginScreen() {
                 title="Entrar"
                 variant="primary"
                 size="lg"
+                loading={isLoading}
+                disabled={isLoading}
                 onPress={handleLoginPress}
               />
 
               <Pressable
                 onPress={handleForgotPassword}
+                disabled={isLoading}
                 style={({ pressed }) => [
                   styles.forgotButton,
-                  { opacity: pressed ? 0.7 : 1 },
+                  { opacity: pressed || isLoading ? 0.7 : 1 },
                 ]}
               >
                 <Text style={styles.forgotText}>Esqueceu a senha?</Text>
@@ -97,9 +149,10 @@ export default function LoginScreen() {
           <View style={styles.footer}>
             <Pressable
               onPress={handleNavigateToRegister}
+              disabled={isLoading}
               style={({ pressed }) => [
                 styles.signupLinkPressable,
-                { opacity: pressed ? 0.7 : 1 },
+                { opacity: pressed || isLoading ? 0.7 : 1 },
               ]}
             >
               <Text style={styles.signupLinkText}>Criar conta.</Text>
@@ -142,6 +195,20 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     gap: spacing.base,
     marginVertical: spacing.xl,
+  },
+  errorBanner: {
+    backgroundColor: colors.status.errorBg,
+    borderColor: colors.status.errorBorder,
+    borderWidth: 1,
+    borderRadius: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  errorBannerText: {
+    color: colors.status.error,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    textAlign: 'center',
   },
   buttonContainer: {
     paddingTop: spacing.sm,

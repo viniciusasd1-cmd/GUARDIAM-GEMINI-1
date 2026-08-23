@@ -111,21 +111,27 @@ export const EvidenceDossierScreen: React.FC<{ onBack?: () => void }> = ({ onBac
               </div>
 
               {/* Audio Playback Simulator */}
-              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+              <div className="w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
                 <button
                   type="button"
                   onClick={() => togglePlay(report.id)}
-                  className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-[#1565C0] cursor-pointer"
+                  className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 hover:text-[#1565C0] cursor-pointer flex-1 min-w-0 text-left"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-blue-100 text-[#1565C0] flex items-center justify-center">
-                    {playingId === report.id ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+                  <div className="w-7 h-7 rounded-lg bg-blue-100 text-[#1565C0] flex items-center justify-center shrink-0">
+                    {playingId === report.id ? (
+                      <Pause className="w-3.5 h-3.5" />
+                    ) : (
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                    )}
                   </div>
-                  <span>{playingId === report.id ? 'Reproduzindo áudio...' : 'Ouvir Gravação (2:25)'}</span>
+                  <span className="truncate">
+                    {playingId === report.id ? 'Reproduzindo áudio...' : 'Ouvir Gravação (2:25)'}
+                  </span>
                 </button>
 
                 <button
                   type="button"
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 transition-colors"
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors shrink-0 cursor-pointer flex items-center justify-center"
                   title="Baixar Relatório"
                 >
                   <Download className="w-4 h-4" />
